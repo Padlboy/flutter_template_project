@@ -25,6 +25,16 @@
       "source": "local",
       "sourceType": "local",
       "description": "Flutter unit and widget test patterns with mockito"
+    },
+    "template-overview": {
+      "source": "local",
+      "sourceType": "local",
+      "description": "Complete overview of this Flutter template repository — architecture, folder structure, agent system, design conventions, and conventions. Mandatory reading for all agents at session start."
+    },
+    "agent-call-rules": {
+      "source": "local",
+      "sourceType": "local",
+      "description": "Authoritative ruleset for which agent can call which, the planning gate check, handoff file workflow, and enforcement summary. Mandatory reading for all agents at session start."
     }
   }
 }
