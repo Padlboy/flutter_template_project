@@ -7,8 +7,8 @@ services:
     volumes:
       - ..:/workspace
       # Persist Flutter config and pub package cache across container rebuilds
-      - flutter-config:/home/flutter/.flutter
-      - flutter-pub-cache:/home/flutter/.pub-cache
+      - flutter-config:/home/ubuntu/.flutter
+      - flutter-pub-cache:/home/ubuntu/.pub-cache
     environment:
       - FLUTTER_HOME=/sdks/flutter
       - FLUTTER_PREBUILT_DART_SDK=true

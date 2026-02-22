@@ -4,7 +4,7 @@
   "service": "flutter-dev",
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
-  "remoteUser": "flutter",
+  "remoteUser": "ubuntu",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -30,6 +30,6 @@
     }
   },
   // Runs once after the container is created; the workspace is already mounted here
-  "postCreateCommand": "cd /workspace/recipe_manager && flutter pub get",
+  "postCreateCommand": "cd /workspace && flutter pub get",
   "forwardPorts": [8080, 8081, 9100]
 }
