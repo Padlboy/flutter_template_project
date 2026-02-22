@@ -121,12 +121,18 @@ All app-specific code lives in `lib/`. Here's where to start:
 
 The `.devcontainer/` folder configures a Docker-based Flutter environment — the same image for every developer.
 
+CI also validates this setup by building the dev container image and running `flutter analyze` inside it.
+
 ```bash
 # Open in container (VS Code)
 F1 → "Dev Containers: Reopen in Container"
 
 # Rebuild after Dockerfile changes
 F1 → "Dev Containers: Rebuild Container"
+
+# Run the same analyze check used in CI
+docker compose -f .devcontainer/docker-compose.yml build flutter-dev
+docker compose -f .devcontainer/docker-compose.yml run --rm --user ubuntu flutter-dev sh -lc "flutter pub get && flutter analyze --fatal-infos"
 ```
 
 See [.devcontainer/README.md](.devcontainer/README.md) for detailed setup including USB Android device passthrough on Windows/WSL2.

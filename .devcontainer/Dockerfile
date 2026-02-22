@@ -15,7 +15,8 @@ ENV FLUTTER_PREBUILT_DART_SDK=true
 # Configure git to trust the pre-installed Flutter SDK directory and disable analytics
 # Do NOT run `flutter channel stable` here — the base image ships on stable already
 # and doing a channel switch triggers a slow git fetch that can fail in offline builds.
-RUN git config --global --add safe.directory /sdks/flutter && \
+RUN chown -R ubuntu:ubuntu /sdks/flutter && \
+    git config --system --add safe.directory /sdks/flutter && \
     flutter config --no-analytics
 
 WORKDIR /workspace

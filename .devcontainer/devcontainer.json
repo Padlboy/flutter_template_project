@@ -30,6 +30,6 @@
     }
   },
   // Runs once after the container is created; the workspace is already mounted here
-  "postCreateCommand": "cd /workspace && flutter pub get",
+  "postCreateCommand": "git config --global --add safe.directory /sdks/flutter && cd /workspace && flutter pub get",
   "forwardPorts": [8080, 8081, 9100]
 }

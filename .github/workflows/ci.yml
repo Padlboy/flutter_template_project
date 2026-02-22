@@ -8,21 +8,16 @@ on:
 
 jobs:
   analyze:
-    name: Dart Analyze
+    name: Flutter Analyze (Dev Container)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
+      - name: Build dev container image
+        run: docker compose -f .devcontainer/docker-compose.yml build flutter-dev
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Run dart analyze
-        run: dart analyze --fatal-infos
+      - name: Run flutter analyze inside dev container
+        run: |
+          docker compose -f .devcontainer/docker-compose.yml run --rm --user ubuntu flutter-dev sh -lc "flutter pub get && flutter analyze --fatal-infos"
