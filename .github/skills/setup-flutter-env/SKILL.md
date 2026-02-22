@@ -9,6 +9,65 @@ This skill guides you through setting up a Flutter development environment with 
 
 ---
 
+## ⚡ IMPORTANT: Project Structure Setup
+
+### Project Location Strategy
+
+**NEW APPROACH (Recommended):**
+When setting up a Flutter project in a git repository root, **always create the project at the root level** rather than in a subfolder.
+
+**Why?**
+- ✅ VS Code Dev Containers automatically discover `.devcontainer/` at the root
+- ✅ Simpler project structure and easier navigation
+- ✅ Better team collaboration with single workspace
+- ✅ Avoids nested folder complexity
+- ✅ Native integration with version control
+
+**How to implement:**
+```bash
+# Navigate to your git repository root
+cd /path/to/your/repo
+
+# Create Flutter project WITH the root folder name
+# (NOT creating a subfolder)
+flutter create --org com.example .
+
+# Example: If your root folder is "flutter_template_repo"
+# The project name will be "flutter_template_repo"
+```
+
+**Alternative - Using create with folder name:**
+```bash
+# If you need to set it up differently:
+flutter create --org com.example --project-name flutter_template_repo .
+```
+
+**Result Structure:**
+```
+flutter_template_repo/ (git root)
+├── .devcontainer/
+├── lib/
+├── pubspec.yaml
+├── README.md
+└── ... other files
+```
+
+**OLD APPROACH (Not recommended):**
+Creating a subfolder like `flutter create recipe_manager` creates nested structure:
+```
+recipe_manager/     # This subfolder
+├── .devcontainer/
+├── lib/
+├── pubspec.yaml
+└── ... other files
+```
+
+❌ Problem: VS Code can't find `.devcontainer/` when parent folder is opened
+
+---
+
+---
+
 ## Phase 1: Pre-Setup Discovery & Analysis
 
 ### Step 1: Understand Your Preferences
@@ -249,47 +308,182 @@ Once you've decided on your approach, the agent will guide you through setup:
 
 ### Path B: Dev Container Setup
 
+**Quick Start - Use Template Files:**
+
+This skill includes production-ready template files for dev container setup. Copy these into your `.devcontainer/` folder:
+
+- 📄 **`devcontainer.json`** - VS Code + Flutter extensions configuration
+- 📄 **`docker-compose.yml`** - Docker Compose orchestration with USB pass-through
+- 📄 **`Dockerfile`** - Flutter development environment image
+
+**How to use:**
+```bash
+# 1. Navigate to repository root
+cd /path/to/your/repo
+
+# 2. Create .devcontainer folder if it doesn't exist
+mkdir -p .devcontainer
+
+# 3. Copy template files from the skill folder
+cp .github/skills/setup-flutter-env/devcontainer.json .devcontainer/
+cp .github/skills/setup-flutter-env/docker-compose.yml .devcontainer/
+cp .github/skills/setup-flutter-env/Dockerfile .devcontainer/
+
+# 4. Customize the files for your project (see customization below)
+code .devcontainer/devcontainer.json
+```
+
+**Template Files Include:**
+- ✅ Flutter latest stable pre-installed
+- ✅ Dart 3.9+ with MCP server enabled
+- ✅ VS Code extensions pre-configured (Dart, Flutter, DevTools)
+- ✅ Android SDK tools available
+- ✅ Windows WSL2 USB device pass-through support
+- ✅ Named volumes for caching (faster builds)
+
+---
+
+**Customizing the Templates:**
+
+**In `devcontainer.json`:**
+- Change `"name"` to your project name
+- Update any VS Code extensions as needed
+- Modify `postCreateCommand` if you need additional setup
+
+**In `docker-compose.yml`:**
+- Update `container_name` to project-specific name
+- Adjust volume paths if different from `.devcontainer/`
+- Update `working_dir` if needed
+
+**In `Dockerfile`:**
+- Add additional system packages with `RUN apt-get install`
+- Install additional Dart/Flutter tools as needed
+- Change `WORKDIR` if different
+
+---
+
 **Create `.devcontainer/devcontainer.json`:**
 
 ```json
 {
   "name": "Flutter Dev",
-  "image": "ghcr.io/cirruslabs/flutter:latest",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "flutter-dev",
+  "workspaceFolder": "/workspace",
   "customizations": {
     "vscode": {
       "extensions": [
         "Dart-Code.dart-code",
-        "Dart-Code.flutter"
+        "Dart-Code.flutter",
+        "Dart-Code.dart-test-runner",
+        "GitHub.copilot"
       ],
       "settings": {
         "dart.mcpServer": true,
         "dart.sdkPath": "/opt/flutter/bin",
-        "dart.flutterSdkPath": "/opt/flutter"
+        "dart.flutterSdkPath": "/opt/flutter",
+        "dart.devToolsPort": 9100,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "Dart-Code.dart-code",
+        "[dart]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "Dart-Code.dart-code"
+        }
       }
     }
   },
-  "postCreateCommand": "flutter pub get && dart pub global activate build_runner",
-  "remoteUser": "root"
+  "postCreateCommand": "flutter pub get && flutter doctor",
+  "remoteUser": "flutter",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "upgradePackages": true
+    }
+  }
 }
+```
+
+**Create `.devcontainer/docker-compose.yml`:**
+
+```yaml
+version: '3.8'
+
+services:
+  flutter-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flutter-dev
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace
+      - flutter-cache:/root/.flutter
+      - flutter-pub-cache:/root/.pub-cache
+    environment:
+      - FLUTTER_HOME=/opt/flutter
+      - PATH=/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - FLUTTER_PREBUILT_DART_SDK=true
+    # USB device support for Android phone
+    # For Windows, Docker Desktop handles USB forwarding
+    # Device must be set in Windows Docker Desktop settings
+    privileged: true
+    stdin_open: true
+    tty: true
+    networks:
+      - flutter-network
+    # For Linux/macOS USB support, uncomment and adjust:
+    # devices:
+    #   - /dev/bus/usb:/dev/bus/usb
+
+networks:
+  flutter-network:
+    driver: bridge
+
+volumes:
+  flutter-cache:
+  flutter-pub-cache:
+```
+
+**Create `.devcontainer/Dockerfile`:**
+
+```dockerfile
+FROM ghcr.io/cirruslabs/flutter:latest
+
+# Create non-root user for development
+RUN useradd -m -s /bin/bash flutter && \
+    chown -R flutter:flutter /opt/flutter
+
+# Install additional development tools
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    wget \
+    zip \
+    unzip \
+    openssh-client \
+    binutils-x86-64-linux-gnu \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Flutter to use prebuilt Dart
+ENV FLUTTER_PREBUILT_DART_SDK=true
+ENV PUB_CACHE=/root/.pub-cache
+
+# Verify Flutter installation
+RUN flutter doctor
+
+WORKDIR /workspace
 ```
 
 **For Dev Container + Physical Phone:**
 
-Add USB host device mapping to `docker-compose.yml`:
-```yaml
-services:
-  flutter-dev:
-    # ... other config ...
-    devices:
-      - /dev/bus/usb:/dev/bus/usb
-    # For Linux: allow adb to access USB
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-```
+The template includes USB pass-through support:
+- **Windows**: Docker Desktop automatically handles USB forwarding
+- **Linux**: Uncomment the `devices` section in `docker-compose.yml`
+- **macOS**: May require additional configuration
 
 **For Dev Container + Android Emulator (Advanced):**
 
-Enable nested virtualization and GPU passthrough (complex, requires:
+````Enable nested virtualization and GPU passthrough (complex, requires:
 - Docker Desktop Pro
 - Nested virtualization enabled in hypervisor
 - GPU passthrough configured

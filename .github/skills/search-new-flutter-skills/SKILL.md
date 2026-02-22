@@ -9,9 +9,73 @@ This skill enables the agent to discover and integrate new Flutter/Dart developm
 
 ---
 
-## Phase 1: Internet Research
+## ⚡ Quick Start: Using the Skills NPM Package
 
-The agent will search for new, useful, and practical Flutter/Dart skills related to:
+**⚠️ IMPORTANT: Load these skills before starting any search:**
+1. **[find-skills](vercel-labs/skills)** - Official skill discovery tool (from vercel-labs/skills package)
+2. **[use-skills-npm-package](../use-skills-npm-package/SKILL.md)** - Complete reference for skills CLI commands
+
+The `skills` npm CLI is the primary tool for discovering, searching, and managing agent skills from community repositories and official sources. The official **find-skills** skill from Vercel Labs provides AI-assisted skill discovery and evaluation.
+
+### Quick Commands
+
+```bash
+# Search for Flutter skills
+npx skills find flutter
+
+# Search for specific integrations (e.g., Supabase)
+npx skills find supabase
+
+# List available skills without installing
+npx skills add owner/repo --list
+
+# Install selected skills
+npx skills add owner/repo --skill "skill-name"
+```
+
+**Always check:** https://www.npmjs.com/package/skills for the latest documentation and commands.
+
+---
+
+## Phase 1: Internet Research using Skills CLI
+
+### Primary Tools: Official find-skills + Skills NPM Package
+
+The agent MUST load and use these in order:
+
+1. **FIRST: Load the [find-skills](https://github.com/vercel-labs/skills/tree/main/skills/find-skills) skill** - Official AI-powered skill discovery (from vercel-labs/skills package)
+   - Provides advanced skill search capabilities
+   - Helps evaluate and recommend skills
+   - Integrated with the skills ecosystem
+
+2. **THEN: Reference [use-skills-npm-package](../use-skills-npm-package/SKILL.md) skill** - Complete CLI documentation
+
+3. **USE CLI commands to find skills:**
+   ```bash
+   # Interactive search
+   npx skills find
+   
+   # Keyword search for Flutter/Dart topics
+   npx skills find flutter
+   npx skills find testing
+   npx skills find "state management"
+   ```
+3. **List available skills from repositories:**
+   ```bash
+   npx skills add vercel-labs/agent-skills --list
+   npx skills add flutter-community/skills --list
+   ```
+4. **Preview SKILL.md files** from found repositories directly on GitHub
+
+### Secondary: Internet Search
+
+After checking the Skills CLI, supplement with web search for:
+- Emerging patterns not yet packaged as skills
+- Recent blog posts and articles about Flutter/Dart
+- GitHub discussions and community patterns
+- Stack Overflow solutions and patterns
+
+The Search Categories
 
 ### Search Categories
 
@@ -262,9 +326,30 @@ In the agent file or a companion document, maintain:
 
 ## Best Practices for Skill Discovery
 
-### Search Strategy
+### Primary Method: Use Skills CLI First
 
-**Primary Sources:**
+**Always use the `skills` npm package as your first discovery method:**
+
+1. **Start with skills find command:**
+   ```bash
+   npx skills find [query]
+   ```
+
+2. **Check major repositories:**
+   ```bash
+   # Vercel Labs official skills
+   npx skills add vercel-labs/agent-skills --list
+   
+   # Community repositories
+   npx skills add flutter-community/skills --list
+   npx skills add dart-community/skills --list
+   ```
+
+3. **Reference the [use-skills-npm-package](../use-skills-npm-package/SKILL.md) skill** for all CLI commands and options
+
+### Secondary Search Sources
+
+**If Skills CLI doesn't find what you need, search:**
 - Flutter official documentation and guides
 - Dart language documentation
 - Community forums (Reddit r/FlutterDev, ItAllWidgets forum)
@@ -301,20 +386,41 @@ In the agent file or a companion document, maintain:
 
 ## Workflow: Discovering and Adding a New Skill
 
-### Step 1: Search
-```
-Agent Action: Search internet for "Flutter state management patterns 2025"
-Returns: Multiple candidate sources
+### Step 1: Use Skills CLI to Search
+
+**First, load the use-skills-npm-package skill** and use it to search:
+
+```bash
+# Interactive search
+npx skills find
+
+# Search for specific topics
+npx skills find flutter
+npx skills find supabase
+npx skills find testing
+
+# List skills from specific repos
+npx skills add vercel-labs/agent-skills --list
 ```
 
-### Step 2: Evaluate
+**Agent Action:** Use Skills CLI to find candidate skills based on developer's request
+
+### Step 2: Supplement with Web Search (if needed)
+
+```
+Agent Action: If Skills CLI doesn't return sufficient results, 
+             search internet for "Flutter [topic] skill guide 2024 2025"
+Returns: Multiple candidate sources including blog posts, GitHub repos, community patterns
+```
+
+### Step 3: Evaluate
 ```
 Agent Action: Review top 3-5 sources for quality and relevance
 Criteria: Practical? Current? Complements existing skills?
 Decision: Select best candidate or multiple complementary skills
 ```
 
-### Step 3: Present
+### Step 4: Present
 ```
 Agent Action: Show developer:
   - Skill title and purpose
@@ -335,7 +441,7 @@ If approved:
   - Verify all links work
 ```
 
-### Step 5: Integrate
+### Step 6: Integrate
 ```
 Update flutter-coding-agent.md:
   - Add to skills list
@@ -344,7 +450,7 @@ Update flutter-coding-agent.md:
   - Create summary in skills inventory
 ```
 
-### Step 6: Verify
+### Step 7: Verify
 ```
 Verify agent awareness:
   - Can reference new skill in decisions
@@ -371,6 +477,13 @@ The flutter-coding-agent should:
 
 ## Resources & References
 
+### Essential: Official Skill Discovery
+- **[find-skills](https://github.com/vercel-labs/skills/tree/main/skills/find-skills)** - Official AI-powered skill discovery (from vercel-labs/skills package) ⭐ **LOAD THIS FIRST**
+- **[use-skills-npm-package](../use-skills-npm-package/SKILL.md)** - Complete guide to discovering and managing skills using the `skills` CLI
+- **Skills npm Package:** https://www.npmjs.com/package/skills
+- **Skills Directory:** https://skills.sh/
+
+### Flutter & Dart Documentation
 - [Flutter Documentation](https://docs.flutter.dev/)
 - [Dart Language](https://dart.dev/)
 - [ItAllWidgets Forum](https://forum.itsallwidgets.com/)
