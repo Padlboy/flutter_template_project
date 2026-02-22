@@ -22,6 +22,7 @@ Fork this repository to start every new Flutter app from a solid foundation.
 6. [Agent Workflow](#6-agent-workflow)
 7. [Daily Commands](#7-daily-commands)
 8. [Troubleshooting](#8-troubleshooting)
+9. [Contributing](#9-contributing)
 
 ---
 
@@ -269,6 +270,45 @@ flutter build appbundle
 | Build fails | `flutter clean && flutter pub get` |
 | Container won't start | Ensure Docker Desktop is running, try Rebuild Container |
 | `flutter doctor` issues | Run `setup-flutter-env` skill for guided diagnosis |
+
+---
+
+## 9. Contributing
+
+Contributions are very welcome! This template is meant to grow with the community.
+
+### Ways to contribute
+
+- **Bug reports** — found something broken? [Open an issue](https://github.com/Padlboy/flutter_template_project/issues/new?template=bug_report.md) with steps to reproduce.
+- **Feature requests** — have an idea to make the template better? [Start a discussion](https://github.com/Padlboy/flutter_template_project/issues/new?template=feature_request.md) or open an issue tagged `enhancement`.
+- **Pull requests** — improvements to code, docs, agent prompts, or skills are all fair game. PRs of any size are appreciated.
+- **New agent skills** — built a reusable skill for the `.github/skills/` folder? Submit a PR!
+- **Template improvements** — better folder structure, new widgets, improved design tokens, smarter routing — all welcome.
+
+### How to submit a PR
+
+```bash
+# 1. Fork the repo on GitHub
+# 2. Clone your fork
+git clone https://github.com/YOUR_USERNAME/flutter_template_project.git
+cd flutter_template_project
+
+# 3. Create a feature branch
+git checkout -b feat/your-improvement
+
+# 4. Make your changes, then run quality checks
+dart format .
+dart analyze
+flutter test
+
+# 5. Commit and push
+git commit -m "feat: describe your change"
+git push origin feat/your-improvement
+
+# 6. Open a Pull Request on GitHub
+```
+
+There's no strict style guide — just keep code clean, document what you added, and make sure `dart analyze` passes with no errors.
 
 ---
 
