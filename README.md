@@ -1,14 +1,227 @@
 # Flutter Template Repository
 
-A beautifully organized Flutter project template with Docker Dev Container support for consistent team development and Android device testing.
+A production-ready Flutter project template with:
 
-## 📋 Features
-- ✅ Complete Flutter project structure
-- ✅ Docker dev container for reproducible environments
-- ✅ Windows WSL2 compatible with USB device pass-through
-- ✅ Pre-configured VS Code setup
-- ✅ Android device testing support
-- ✅ Multi-platform support (Android, iOS, Web, Windows, Linux, macOS)
+- **Supabase** back-end (auth, database, RLS) — wired out of the box
+- **go_router** for declarative, guard-protected navigation
+- **Docker dev container** for a reproducible team environment
+- **Multi-agent AI workflow** (design, backend, coding, testing agents)
+- Pre-built auth screens (login / register), a generic home screen, and reusable widgets
+
+Fork this repository to start every new Flutter app from a solid foundation.
+
+---
+
+## Table of Contents
+
+1. [Fork & First Steps](#1-fork--first-steps)
+2. [Supabase Setup](#2-supabase-setup)
+3. [Customise the Template](#3-customise-the-template)
+4. [Dev Container](#4-dev-container)
+5. [Project Structure](#5-project-structure)
+6. [Agent Workflow](#6-agent-workflow)
+7. [Daily Commands](#7-daily-commands)
+8. [Troubleshooting](#8-troubleshooting)
+
+---
+
+## 1. Fork & First Steps
+
+```bash
+# 1. Fork this repo on GitHub, then clone your fork
+git clone https://github.com/YOUR_USERNAME/YOUR_APP_NAME.git
+cd YOUR_APP_NAME
+
+# 2. Rename the app (update pubspec.yaml → name field)
+# 3. Open in VS Code
+code .
+
+# 4. (Optional) Reopen in Dev Container when prompted
+```
+
+Rename the package in `pubspec.yaml`:
+
+```yaml
+name: your_app_name            # ← change this
+description: "My awesome app" # ← change this
+```
+
+Then run:
+
+```bash
+flutter pub get
+```
+
+---
+
+## 2. Supabase Setup
+
+The template is pre-wired for Supabase. You just need to provision your own project.
+
+### Option A — AI-assisted (recommended)
+
+Ask the **supabase-agent** to do everything:
+
+```
+supabase-agent: setup
+```
+
+The agent will create the project, apply the baseline migration, and write your credentials into `lib/supabase_config.dart`.
+
+### Option B — Manual
+
+1. Create a project at [supabase.com](https://supabase.com)
+2. Copy your project URL and anon key from **Settings → API**
+3. Run the migration in the Supabase SQL editor:
+   ```
+   supabase/migrations/001_initial_schema.sql
+   ```
+4. Pass credentials via `--dart-define` (recommended):
+
+```bash
+flutter run --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co \
+            --dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY
+```
+
+> **Never commit real keys** — use `--dart-define` or a `.env` file that is gitignored.
+
+---
+
+## 3. Customise the Template
+
+All app-specific code lives in `lib/`. Here's where to start:
+
+| File | What to do |
+|---|---|
+| `lib/main.dart` | Change the app title (`'My App'`) |
+| `lib/router.dart` | Add your app's routes below the `// TODO` comment |
+| `lib/features/home/home_screen.dart` | Replace the placeholder content |
+| `lib/widgets/app_drawer.dart` | Add your navigation items |
+| `lib/design/app_colors.dart` | Change the colour palette |
+| `lib/design/app_theme.dart` | Tweak typography, shape, and theme |
+| `supabase/migrations/001_initial_schema.sql` | Add your app-specific tables after the `profiles` table |
+
+### Adding a new feature
+
+```
+1. Ask supabase-agent to create any tables you need:
+   supabase-agent: db create [describe your table]
+
+2. Create your model in lib/models/
+3. Create your repository in lib/repositories/
+4. Create your notifier in lib/features/<feature>/
+5. Create your screen(s) in lib/features/<feature>/
+6. Register routes in lib/router.dart
+```
+
+---
+
+## 4. Dev Container
+
+The `.devcontainer/` folder configures a Docker-based Flutter environment — the same image for every developer.
+
+```bash
+# Open in container (VS Code)
+F1 → "Dev Containers: Reopen in Container"
+
+# Rebuild after Dockerfile changes
+F1 → "Dev Containers: Rebuild Container"
+```
+
+See [.devcontainer/README.md](.devcontainer/README.md) for detailed setup including USB Android device passthrough on Windows/WSL2.
+
+---
+
+## 5. Project Structure
+
+```
+.
+├── lib/
+│   ├── main.dart                    # App entry point
+│   ├── router.dart                  # go_router configuration
+│   ├── supabase_config.dart         # Supabase credentials (use --dart-define)
+│   ├── design/
+│   │   ├── app_colors.dart          # Colour palette
+│   │   ├── app_spacing.dart         # Spacing constants
+│   │   └── app_theme.dart           # MaterialTheme
+│   ├── features/
+│   │   ├── auth/                    # Login & register screens + notifier
+│   │   └── home/                    # Home screen placeholder
+│   ├── models/                      # Data models (add yours here)
+│   ├── repositories/
+│   │   └── auth_repository.dart     # Auth Supabase calls
+│   └── widgets/                     # Reusable widgets
+│       ├── app_drawer.dart
+│       ├── empty_state.dart
+│       ├── loading_spinner.dart
+│       └── primary_button.dart
+├── supabase/
+│   └── migrations/
+│       └── 001_initial_schema.sql   # profiles table + trigger
+├── test/                            # Unit & widget tests
+├── .devcontainer/                   # Docker dev environment
+├── .github/
+│   ├── agents/                      # AI agent definitions
+│   └── skills/                      # Reusable agent skills
+├── pubspec.yaml
+└── analysis_options.yaml
+```
+
+---
+
+## 6. Agent Workflow
+
+This template ships with a **multi-agent AI system** for VS Code (GitHub Copilot chat agents):
+
+| Agent | Purpose | How to call |
+|---|---|---|
+| `flutter-coding-agent` | Main coding agent — features, refactors, debugging | Default coding agent |
+| `supabase-agent` | All Supabase tasks — projects, schema, auth, wiring | `supabase-agent: <cmd>` |
+| `design-agent` | Figma → Flutter design tokens & implementation guides | `design-agent: <cmd>` |
+| `browser-mode-tester` | Playwright E2E + Flutter unit/widget tests | `browser-mode-tester: <cmd>` |
+
+See [AGENTS.md](AGENTS.md) for the full list of commands and rules.
+
+---
+
+## 7. Daily Commands
+
+```bash
+# Run on web (after Supabase setup)
+flutter run -d chrome
+
+# Run on Android device
+flutter run
+
+# Code quality
+dart format .
+dart analyze
+dart fix --apply
+flutter test
+
+# Build
+flutter build apk --release
+flutter build web
+flutter build appbundle
+```
+
+---
+
+## 8. Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `SUPABASE_URL` placeholder error | Run `supabase-agent: setup` or pass `--dart-define` flags |
+| Device not found | `flutter doctor`, reconnect USB, check USB Debugging |
+| Build fails | `flutter clean && flutter pub get` |
+| Container won't start | Ensure Docker Desktop is running, try Rebuild Container |
+| `flutter doctor` issues | Run `setup-flutter-env` skill for guided diagnosis |
+
+---
+
+## License
+
+[Add your license here]
 
 ---
 
@@ -34,144 +247,3 @@ code .
 # 4. Wait for container to build (~2 min first time)
 
 # 5. Connect your Android phone via USB
-
-# 6. Verify setup
-flutter doctor
-flutter devices
-```
-
-### Running the App
-```bash
-flutter run
-```
-
----
-
-## 📁 Project Structure
-
-```
-.
-├── .devcontainer/           # Docker dev environment
-│   ├── devcontainer.json    # VS Code settings
-│   ├── docker-compose.yml   # Container configuration
-│   ├── Dockerfile           # Flutter image
-│   └── README.md           # Detailed setup instructions
-├── lib/                     # Dart/Flutter source code
-│   ├── main.dart           # App entry point
-│   ├── screens/            # UI screens
-│   ├── models/             # Data models
-│   ├── services/           # Business logic
-│   └── widgets/            # Reusable UI components
-├── test/                   # Unit & widget tests
-├── android/                # Android configuration
-├── ios/                    # iOS configuration
-├── web/                    # Web configuration
-├── pubspec.yaml            # Flutter dependencies
-├── analysis_options.yaml   # Code quality settings
-└── README.md              # This file
-```
-
----
-
-## 🛠️ Development
-
-### Code Style & Quality
-```bash
-# Format code
-dart format .
-
-# Run analyzer
-dart analyze
-
-# Run tests
-flutter test
-
-# Fix common issues
-dart fix --apply
-```
-
-### Building
-```bash
-# Debug build
-flutter build apk
-
-# Release build
-flutter build apk --release
-
-# Google Play distribution
-flutter build appbundle --release
-```
-
----
-
-## 📱 Testing
-
-Testing is performed on a **physical Android device** for accurate real-world behavior.
-
-1. Connect your device via USB
-2. Enable USB Debugging in Developer Options
-3. Run: `flutter devices` to verify connection
-4. Run: `flutter run` to deploy and test
-
-### Unit Tests
-```bash
-flutter test
-```
-
----
-
-## 📚 Documentation
-
-- **Setup Guide**: See [.devcontainer/README.md](.devcontainer/README.md)
-- **Quick Reference**: See [QUICK_REFERENCE.md](QUICK_REFERENCE.md)
-- **Setup Checklist**: See [SETUP_CHECKLIST.md](SETUP_CHECKLIST.md)
-- **Flutter Docs**: https://flutter.dev/docs
-- **Dart Docs**: https://dart.dev/guides
-
----
-
-## 🤝 Team Collaboration
-
-This project uses Docker Dev Containers to ensure all team members have identical development environments.
-
-**Before committing:**
-1. Format code: `dart format .`
-2. Run analyzer: `dart analyze`
-3. Run tests: `flutter test`
-4. Verify build: `flutter build apk --debug`
-
----
-
-## 🐛 Troubleshooting
-
-**Device not appearing?**
-- Check: `flutter doctor`
-- Reconnect USB cable
-- Enable USB Debugging on device
-- See [.devcontainer/README.md](.devcontainer/README.md) for Windows USB fixes
-
-**Build issues?**
-- Clear cache: `flutter clean`
-- Get dependencies: `flutter pub get`
-- Rebuild container: Dev Containers: Rebuild Container
-
-**Permission errors?**
-- Ensure Docker Desktop has 4GB+ RAM allocated
-- Restart Docker Desktop
-
----
-
-## 📄 License
-
-[Your License Here]
-
----
-
-## ✨ Getting Started with Development
-
-1. Read [QUICK_REFERENCE.md](QUICK_REFERENCE.md) for essential commands
-2. Check [SETUP_CHECKLIST.md](SETUP_CHECKLIST.md) to verify everything works
-3. Review [.devcontainer/README.md](.devcontainer/README.md) for detailed setup
-4. Start exploring and building your Flutter app!
-
-Happy coding! 🎉

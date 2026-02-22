@@ -44,5 +44,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Ignore the recipe_manager subdirectory (legacy, to be removed)
-/recipe_manager/
+# Environment / secrets — never commit real Supabase keys
+.env
+.env.*
+!.env.example
+
+# Playwright auth state
+playwright/.auth/

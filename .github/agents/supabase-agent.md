@@ -57,7 +57,7 @@ Always use the Supabase MCP server for backend operations. Never guess project v
 
 ### Installation
 ```yaml
-# recipe_manager/pubspec.yaml
+# pubspec.yaml
 dependencies:
   supabase_flutter: ^2.0.0
 ```
@@ -80,7 +80,7 @@ final supabase = Supabase.instance.client;
 ```
 
 ### Config file convention
-Store keys in `recipe_manager/lib/supabase/supabase_config.dart`:
+Store keys in `lib/supabase_config.dart`:
 ```dart
 // NEVER commit real keys — use environment variables or --dart-define
 abstract class SupabaseConfig {
@@ -111,10 +111,10 @@ Use `list_projects` to check if there's an existing Supabase project. Ask the de
 - `get_publishable_keys` → anon key (publishable key)
 
 ### Step 4 — Create Flutter config file
-Generate `recipe_manager/lib/supabase/supabase_config.dart` with the retrieved values.
+Generate `lib/supabase_config.dart` with the retrieved values.
 
 ### Step 5 — Update pubspec.yaml
-Add `supabase_flutter: ^2.0.0` to `recipe_manager/pubspec.yaml` if not present.
+Add `supabase_flutter: ^2.0.0` to `pubspec.yaml` if not present.
 
 ### Step 6 — Update main.dart
 Inject `Supabase.initialize(...)` at app startup.
@@ -251,7 +251,7 @@ When providing Flutter integration code, always output:
 
 ### Flutter Code
 \```dart
-// lib/supabase/[feature].dart
+// lib/[feature].dart
 \```
 
 ### pubspec.yaml dependency
@@ -280,7 +280,7 @@ Save handoff files to:
 
 Examples:
 - `.github/agents/supabase-agent/auth-email-password.md`
-- `.github/agents/supabase-agent/recipes-table.md`
+- `.github/agents/supabase-agent/user-profile-table.md`
 - `.github/agents/supabase-agent/realtime-comments.md`
 
 ### Handoff file format
@@ -308,7 +308,7 @@ supabase_flutter: ^2.0.0
 ## Environment config
 - SUPABASE_URL: (set via --dart-define or env)
 - SUPABASE_ANON_KEY: (set via --dart-define or env)
-- Config file: `lib/supabase/supabase_config.dart`
+- Config file: `lib/supabase_config.dart`
 
 ## Flutter implementation tasks
 - [ ] Task 1 — description (file: `lib/...`)

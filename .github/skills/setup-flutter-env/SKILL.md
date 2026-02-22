@@ -53,9 +53,9 @@ flutter_template_repo/ (git root)
 ```
 
 **OLD APPROACH (Not recommended):**
-Creating a subfolder like `flutter create recipe_manager` creates nested structure:
+Creating a subfolder like `flutter create my_app` creates nested structure:
 ```
-recipe_manager/     # This subfolder
+my_app/             # This subfolder
 ├── .devcontainer/
 ├── lib/
 ├── pubspec.yaml

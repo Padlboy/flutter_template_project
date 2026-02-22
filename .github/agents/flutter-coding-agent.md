@@ -105,7 +105,7 @@ Complete reference guide for MCP tools and how to use them effectively.
 ### Implementing a Supabase Feature
 ```
 1. Check .github/agents/supabase-agent/ for handoff instruction files
-   related to your feature (e.g., auth-email-password.md, recipes-table.md)
+   related to your feature (e.g., auth-email-password.md, user-profile.md)
 2. If a handoff file exists:
    - Read it fully before writing any code
    - Follow the implementation tasks checklist in the file

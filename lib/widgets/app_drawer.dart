@@ -5,6 +5,9 @@ import '../../design/app_colors.dart';
 import '../../features/auth/auth_notifier.dart';
 
 /// The app's side navigation drawer.
+///
+/// Add your app-specific navigation items by adding [_DrawerItem] entries
+/// in the [Column] below.
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key, required this.authNotifier});
 
@@ -21,29 +24,13 @@ class AppDrawer extends StatelessWidget {
           const SizedBox(height: 8),
           _DrawerItem(
             icon: Icons.home_outlined,
-            label: 'Recipes',
+            label: 'Home',
             onTap: () {
               context.go('/');
               Navigator.of(context).pop();
             },
           ),
-          _DrawerItem(
-            icon: Icons.category_outlined,
-            label: 'Categories',
-            onTap: () {
-              context.go('/categories');
-              Navigator.of(context).pop();
-            },
-          ),
-          const Divider(),
-          _DrawerItem(
-            icon: Icons.add_circle_outline,
-            label: 'Add New Recipe',
-            onTap: () {
-              Navigator.of(context).pop();
-              context.go('/recipes/new');
-            },
-          ),
+          // TODO: Add your app-specific navigation items here.
           const Spacer(),
           const Divider(),
           _DrawerItem(
@@ -72,13 +59,13 @@ class _DrawerHeader extends StatelessWidget {
     return UserAccountsDrawerHeader(
       decoration: const BoxDecoration(color: AppColors.primary),
       accountName: const Text(
-        'All About Snacks',
+        'My App', // TODO: Replace with your app name
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
       accountEmail: Text(email),
       currentAccountPicture: const CircleAvatar(
         backgroundColor: AppColors.surface,
-        child: Icon(Icons.cookie_outlined, color: AppColors.primary, size: 36),
+        child: Icon(Icons.person_outline, color: AppColors.primary, size: 36),
       ),
     );
   }

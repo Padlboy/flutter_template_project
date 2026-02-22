@@ -80,13 +80,18 @@ flutter run
 | File/Folder | Purpose |
 |------------|---------|
 | `lib/main.dart` | App entry point |
-| `lib/screens/` | UI screens |
+| `lib/router.dart` | go_router navigation |
+| `lib/supabase_config.dart` | Supabase credentials (use --dart-define) |
+| `lib/features/` | Feature screens and notifiers |
 | `lib/models/` | Data models |
-| `lib/services/` | Business logic |
+| `lib/repositories/` | Data access / Supabase calls |
 | `lib/widgets/` | Reusable widgets |
+| `lib/design/` | Colors, spacing, theme |
 | `test/` | Unit & widget tests |
 | `pubspec.yaml` | Dependencies & config |
 | `.devcontainer/` | Docker setup |
+| `.github/agents/` | AI agent definitions |
+| `.github/skills/` | Reusable agent skills |
 
 ---
 

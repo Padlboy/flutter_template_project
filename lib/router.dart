@@ -5,22 +5,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'features/auth/auth_notifier.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/register_screen.dart';
-import 'features/categories/category_list_screen.dart';
 import 'features/home/home_screen.dart';
-import 'features/recipes/recipe_detail_screen.dart';
-import 'features/recipes/recipe_edit_screen.dart';
-import 'features/recipes/recipe_notifier.dart';
-import 'models/recipe.dart';
-import 'features/categories/category_notifier.dart';
-import 'repositories/recipe_repository.dart';
 
-/// Builds the app router wired to the provided notifiers / repositories.
-GoRouter buildRouter({
-  required AuthNotifier authNotifier,
-  required RecipeListNotifier recipeListNotifier,
-  required CategoryNotifier categoryNotifier,
-  required RecipeRepository recipeRepository,
-}) {
+/// Builds the app router.
+///
+/// The auth guard redirects unauthenticated users to the login screen.
+/// Add your app-specific routes to [routes] below.
+GoRouter buildRouter({required AuthNotifier authNotifier}) {
   return GoRouter(
     initialLocation: '/',
     refreshListenable: authNotifier,
@@ -52,65 +43,9 @@ GoRouter buildRouter({
       // ── Home ────────────────────────────────────────────────────────────
       GoRoute(
         path: '/',
-        builder: (context, state) => HomeScreen(
-          authNotifier: authNotifier,
-          recipeListNotifier: recipeListNotifier,
-        ),
+        builder: (context, state) => HomeScreen(authNotifier: authNotifier),
       ),
-      // ── Categories ──────────────────────────────────────────────────────
-      GoRoute(
-        path: '/categories',
-        builder: (context, state) => CategoryListScreen(
-          authNotifier: authNotifier,
-          categoryNotifier: categoryNotifier,
-        ),
-      ),
-      GoRoute(
-        path: '/categories/:id',
-        builder: (context, state) {
-          final categoryId = state.pathParameters['id']!;
-          // Reuse the list notifier but filter by category
-          recipeListNotifier.load(categoryId: categoryId);
-          return HomeScreen(
-            authNotifier: authNotifier,
-            recipeListNotifier: recipeListNotifier,
-          );
-        },
-      ),
-      // ── Recipes ─────────────────────────────────────────────────────────
-      GoRoute(
-        path: '/recipes/new',
-        builder: (context, state) => RecipeEditScreen(
-          authNotifier: authNotifier,
-          recipeEditNotifier: RecipeEditNotifier(recipeRepository),
-          categoryNotifier: categoryNotifier,
-        ),
-      ),
-      GoRoute(
-        path: '/recipes/:id',
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return RecipeDetailScreen(
-            recipeId: id,
-            recipeListNotifier: recipeListNotifier,
-          );
-        },
-      ),
-      GoRoute(
-        path: '/recipes/:id/edit',
-        builder: (context, state) {
-          final existing = state.extra as Recipe?;
-          return RecipeEditScreen(
-            authNotifier: authNotifier,
-            recipeEditNotifier: RecipeEditNotifier(
-              recipeRepository,
-              existing: existing,
-            ),
-            categoryNotifier: categoryNotifier,
-            existing: existing,
-          );
-        },
-      ),
+      // TODO: Add your app-specific routes here.
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(
@@ -119,7 +54,7 @@ GoRouter buildRouter({
           children: [
             const Icon(Icons.error_outline, size: 64),
             const SizedBox(height: 16),
-            Text('Page not found: ${state.uri}'),
+            Text('Page not found: \${state.uri}'),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => context.go('/'),

@@ -39,21 +39,21 @@ page.locator('//div[1]/span')                     // ❌ avoid — XPath breaks 
 ```ts
 import { test, expect } from '@playwright/test';
 
-test.describe('Feature: Recipe Management', () => {
+test.describe('Feature: Example Feature', () => {
   test.beforeEach(async ({ page }) => {
     // shared setup — navigate + authenticate
     await page.goto('http://localhost:PORT');
   });
 
-  test('should display empty state when no recipes exist', async ({ page }) => {
-    await expect(page.getByText('No snack recipes yet')).toBeVisible();
+  test('should display empty state when no items exist', async ({ page }) => {
+    await expect(page.getByText('No items yet')).toBeVisible();
   });
 
-  test('should create a new recipe', async ({ page }) => {
-    await page.getByRole('button', { name: 'Add Recipe' }).click();
-    await page.getByLabel('Title').fill('Nachos');
+  test('should create a new item', async ({ page }) => {
+    await page.getByRole('button', { name: 'Add Item' }).click();
+    await page.getByLabel('Title').fill('My first item');
     await page.getByRole('button', { name: 'Save' }).click();
-    await expect(page.getByText('Nachos')).toBeVisible();
+    await expect(page.getByText('My first item')).toBeVisible();
   });
 });
 ```
@@ -108,11 +108,11 @@ Flutter renders to a `<canvas>` / semantic tree. To make elements testable:
    ```dart
    ElevatedButton(
      onPressed: onSave,
-     child: const Text('Save Recipe'),  // Playwright: getByText('Save Recipe')
+     child: const Text('Save'),       // Playwright: getByText('Save')
    )
    Semantics(
-     label: 'Recipe title input',
-     child: TextField(...),             // Playwright: getByLabel('Recipe title input')
+     label: 'Title input',
+     child: TextField(...),            // Playwright: getByLabel('Title input')
    )
    ```
 
@@ -120,7 +120,7 @@ Flutter renders to a `<canvas>` / semantic tree. To make elements testable:
    ```ts
    // Flutter web may need a short wait after navigation
    await page.waitForLoadState('networkidle');
-   await expect(page.getByText('All About Snacks')).toBeVisible();
+   await expect(page.getByText('Home')).toBeVisible();
    ```
 
 ---
