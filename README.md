@@ -171,16 +171,69 @@ See [.devcontainer/README.md](.devcontainer/README.md) for detailed setup includ
 
 ## 6. Agent Workflow
 
-This template ships with a **multi-agent AI system** for VS Code (GitHub Copilot chat agents):
+This template ships with a **multi-agent AI system** built on GitHub Copilot chat agents. Each agent has a narrow, well-defined responsibility. They hand off context via markdown files in `ai-context/` rather than calling each other in unpredictable chains.
+
+> ⚠️ **The `planning-agent` MUST run first.** Every other agent checks for `ai-context/planning-agent/app-plan.md` at startup and refuses to work until it exists.
+
+### Agents at a glance
 
 | Agent | Purpose | How to call |
 |---|---|---|
-| `flutter-coding-agent` | Main coding agent — features, refactors, debugging | Default coding agent |
-| `supabase-agent` | All Supabase tasks — projects, schema, auth, wiring | `supabase-agent: <cmd>` |
+| `planning-agent` | **First step** — converts your app idea into a structured plan | `planning-agent: [describe your app]` |
 | `design-agent` | Figma → Flutter design tokens & implementation guides | `design-agent: <cmd>` |
+| `supabase-agent` | All Supabase tasks — projects, schema, auth, RLS wiring | `supabase-agent: <cmd>` |
+| `flutter-coding-agent` | Central coding agent — features, refactors, debugging | default Copilot agent |
 | `browser-mode-tester` | Playwright E2E + Flutter unit/widget tests | `browser-mode-tester: <cmd>` |
 
-See [AGENTS.md](AGENTS.md) for the full list of commands and rules.
+### Mandatory invocation order
+
+```
+1. planning-agent       → creates app-plan.md, design-brief.md, supabase-plan.md
+2. design-agent         → translates Figma into Flutter design specs
+3. supabase-agent       → provisions backend, writes supabase handoff files
+4. flutter-coding-agent → implements features using all the above
+5. browser-mode-tester  → validates everything works
+```
+
+### How agents communicate
+
+Agents don't call each other directly (except where the permission matrix allows). Instead they **write handoff files** that the next agent reads:
+
+```
+ai-context/
+  planning-agent/
+    app-plan.md          ← feature plan, user stories, screen map
+    design-brief.md      ← color direction, tone, typography
+    supabase-plan.md     ← tables, auth strategy, migration order
+  design-agent/
+    *.md                 ← design specs & implementation guides
+  supabase-agent/
+    supabase-setup.md    ← connection details, table list, RLS summary
+  browser-mode-tester/
+    *-test-instructions.md  ← queued test tasks
+```
+
+### Example: starting a new app from scratch
+
+```
+# Step 1 — describe your idea
+planning-agent: I want to build a recipe manager app with
+                user accounts, ingredient tracking, and meal planning
+
+# Step 2 — set up the design (if you have a Figma file)
+design-agent: initialize design project, figma_url: https://figma.com/design/...
+
+# Step 3 — provision the backend
+supabase-agent: setup
+
+# Step 4 — implement features (reads all handoff files automatically)
+flutter-coding-agent: implement the recipe list screen
+
+# Step 5 — test
+browser-mode-tester: e2e
+```
+
+See [AGENTS.md](AGENTS.md) for the full command reference, call-permission matrix, and global rules.
 
 ---
 
@@ -221,7 +274,7 @@ flutter build appbundle
 
 ## License
 
-[Add your license here]
+[MIT](LICENSE) — free to use, fork, and build on.
 
 ---
 
