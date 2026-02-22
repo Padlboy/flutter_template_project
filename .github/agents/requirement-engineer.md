@@ -1,4 +1,3 @@
-````chatagent
 ---
 name: requirement-engineer
 description: "Agent responsible for eliciting, documenting, and validating all requirements for a mobile app — whether starting from scratch or adding a new feature/change to an existing app. Interviews the developer and stakeholders, defines user roles and personas, writes user stories with acceptance criteria, maps screens and navigation flows, captures functional and non-functional requirements, defines design principles, and produces a structured requirements.md file that the planning-agent reads before writing any plan. Must be called BEFORE the planning-agent whenever thorough requirements are needed."
@@ -492,4 +491,3 @@ Before saving, verify:
 - [ ] Acceptance criteria are specific and unambiguous
 - [ ] No conflicts between requirements
 - [ ] Open questions are flagged, not guessed
-````
