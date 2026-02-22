@@ -2,19 +2,47 @@
 
 This repository uses a multi-agent workflow for Flutter app development.
 
-> ⚠️ **The planning-agent MUST run first.** No other agent will start work until `ai-context/planning-agent/app-plan.md` exists.
+> ⚠️ **Check `ai-context/planning-status.json` before starting work.** If `initial_planning_completed` is `false`, define requirements and a plan first. If `true`, scope your work to a new feature or change.
+
+---
+
+## Planning Status Flag
+
+The file `ai-context/planning-status.json` controls which mode the agents operate in.
+
+| `initial_planning_completed` | Meaning | What agents should do |
+|---|---|---|
+| `false` | No app has been planned yet | Require full requirements + planning workflow before any implementation |
+| `true` | App is planned & in development | Accept scoped feature/change requests |
+
+**After the first full plan is created, the planning-agent sets this flag to `true` automatically.**
 
 ---
 
 ## Mandatory Invocation Order
 
+### Starting a New App (initial_planning_completed = false)
+
 ```
-1. planning-agent       → first, always. Creates the app plan.
-2. design-agent         → translates Figma into Flutter design specs.
-3. supabase-agent       → sets up the backend, writes handoff files.
-4. flutter-coding-agent → implements features using all the above.
-5. browser-mode-tester  → validates everything works.
+0. requirement-engineer → elicits and documents all requirements → writes requirements.md
+1. planning-agent       → reads requirements.md and creates the app plan
+2. design-agent         → translates Figma / brief into Flutter design specs
+3. supabase-agent       → sets up the backend, writes handoff files
+4. flutter-coding-agent → implements features using all the above
+5. browser-mode-tester  → validates everything works
 ```
+
+### Adding a Feature or Change (initial_planning_completed = true)
+
+```
+0. requirement-engineer → elicits scoped requirements for the change → writes change-request-<name>.md
+1. planning-agent       → updates the app plan for the change
+2. (design-agent / supabase-agent as needed)
+3. flutter-coding-agent → implements the feature
+4. browser-mode-tester  → validates the change
+```
+
+> The `requirement-engineer` step is recommended but optional — the `planning-agent` can also work directly from a developer description.
 
 ---
 
@@ -22,6 +50,7 @@ This repository uses a multi-agent workflow for Flutter app development.
 
 | Agent | Can call | Cannot call |
 |---|---|---|
+| `requirement-engineer` | planning-agent | everyone else |
 | `planning-agent` | nobody | everyone |
 | `flutter-coding-agent` | design-agent, supabase-agent, browser-mode-tester | — |
 | `design-agent` | nobody | everyone |
@@ -37,24 +66,49 @@ See `.github/skills/agent-call-rules/SKILL.md` for the full authoritative rulese
 
 ## Agents
 
+### requirement-engineer
+**Location:** `.github/agents/requirement-engineer.md`
+**Output directory:** `ai-context/requirements-engineer/`
+
+The **requirement-engineer** is the requirements elicitation and documentation specialist. It works with the developer and stakeholders to discover, clarify, and document all requirements before any planning or implementation begins.
+
+- **Mode A (new app):** Runs full requirements elicitation — user roles, user stories, screen inventory, functional and non-functional requirements, design principles, constraints
+- **Mode B (change/feature):** Runs scoped change requirements elicitation for a specific feature or change
+- Writes `requirements.md` — comprehensive requirements document read by the planning-agent
+- Writes `change-request-<name>.md` — scoped change request for Mode B work
+- **Can call the planning-agent** when requirements are complete and the user is ready to proceed
+- Checks `ai-context/planning-status.json` to determine Mode A or Mode B
+
+**The requirement-engineer is optional but recommended** — the planning-agent can also work directly from a developer description.
+
+To invoke:
+```
+requirement-engineer: new app — [brief description]
+requirement-engineer: new feature — [feature description]
+requirement-engineer: change — [what needs to change and why]
+```
+
+---
+
 ### planning-agent
 **Location:** `.github/agents/planning-agent.md`
 **Output directory:** `ai-context/planning-agent/`
 
-The **planning-agent** is the mandatory first step for any new app or major feature. It converts a raw app idea into three structured planning files that every other agent reads before starting work.
+The **planning-agent** creates and maintains the master app plan. It supports both initial app planning and scoped change/feature planning.
 
-- Asks clarifying questions to understand the app concept
+- **Mode A (new app, `initial_planning_completed: false`):** Creates the complete plan from scratch. Reads `requirements.md` if available; asks clarifying questions if not.
+- **Mode B (change/feature, `initial_planning_completed: true`):** Updates the existing plan to incorporate a new feature or change without rewriting unrelated sections.
 - Writes `app-plan.md` — master feature plan, user stories, screen map, tech decisions
 - Writes `design-brief.md` — color direction, tone, typography, UI component style
 - Writes `supabase-plan.md` — tables, columns, auth strategy, RLS policies, migration order
-- Does **NOT** call any other agent
-- Is **NOT** called by any agent — only by the user
+- After Mode A completion, sets `initial_planning_completed: true` in `planning-status.json`
+- Does **NOT** call any other agent (except after Mode A completion, it has no call permissions)
 
-**⛔ All other agents reject work until `app-plan.md` exists.**
+**⛔ All other implementation agents reject work until `app-plan.md` exists.**
 
 To invoke:
 ```
-planning-agent: [describe your app idea]
+planning-agent: [describe your app idea or change]
 ```
 
 ---
@@ -164,22 +218,34 @@ browser-mode-tester: report                        # show last test run HTML rep
 
 ## Global Rules for All Agents
 
-### 1. App Plan Gate — Non-Negotiable
+### 1. Check Planning Status First — Non-Negotiable
 
-**Every agent MUST check for `app-plan.md` before starting any work:**
+**Every agent MUST check the planning status flag before starting any work:**
+```
+ai-context/planning-status.json
+```
+
+| `initial_planning_completed` | Required action |
+|---|---|
+| `false` | STOP — tell the user no requirements/plan exists yet. Guide them to run the `requirement-engineer` first, then the `planning-agent`. |
+| `true` | Proceed. Scope work to the requested feature or change. |
+
+### 2. App Plan Gate — Non-Negotiable
+
+**Every implementation agent (design, supabase, coding, tester) MUST check for `app-plan.md` before starting any work:**
 ```
 ai-context/planning-agent/app-plan.md
 ```
 If the file does not exist — **STOP and tell the user to run the planning-agent first.**
 
-### 2. Read Call Rules at Startup
+### 3. Read Call Rules at Startup
 
 Every agent MUST read the `agent-call-rules` skill at the start of every session:
 ```
 .github/skills/agent-call-rules/SKILL.md
 ```
 
-### 3. Read Template Overview at Startup
+### 4. Read Template Overview at Startup
 
 Every agent MUST read the `template-overview` skill at the start of every session:
 ```

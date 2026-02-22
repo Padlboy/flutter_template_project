@@ -180,26 +180,38 @@ See [.devcontainer/README.md](.devcontainer/README.md) for detailed setup includ
 
 This template ships with a **multi-agent AI system** built on GitHub Copilot chat agents. Each agent has a narrow, well-defined responsibility. They hand off context via markdown files in `ai-context/` rather than calling each other in unpredictable chains.
 
-> ⚠️ **The `planning-agent` MUST run first.** Every other agent checks for `ai-context/planning-agent/app-plan.md` at startup and refuses to work until it exists.
+> ⚠️ **Check `ai-context/planning-status.json` before starting work.** If `initial_planning_completed` is `false`, no app has been defined yet — run the `requirement-engineer` and then the `planning-agent` first. All implementation agents refuse to work until `ai-context/planning-agent/app-plan.md` exists.
 
 ### Agents at a glance
 
 | Agent | Purpose | How to call |
 |---|---|---|
-| `planning-agent` | **First step** — converts your app idea into a structured plan | `planning-agent: [describe your app]` |
+| `requirement-engineer` | **Recommended first step** — elicits & documents all requirements | `requirement-engineer: [describe your app or change]` |
+| `planning-agent` | Converts requirements/idea into a structured plan | `planning-agent: [describe your app or change]` |
 | `design-agent` | Figma → Flutter design tokens & implementation guides | `design-agent: <cmd>` |
 | `supabase-agent` | All Supabase tasks — projects, schema, auth, RLS wiring | `supabase-agent: <cmd>` |
 | `flutter-coding-agent` | Central coding agent — features, refactors, debugging | default Copilot agent |
 | `browser-mode-tester` | Playwright E2E + Flutter unit/widget tests | `browser-mode-tester: <cmd>` |
 
-### Mandatory invocation order
+### Mandatory invocation order — new app
 
 ```
-1. planning-agent       → creates app-plan.md, design-brief.md, supabase-plan.md
+0. requirement-engineer → elicits requirements → writes requirements.md (recommended)
+1. planning-agent       → reads requirements.md → creates app-plan.md, design-brief.md, supabase-plan.md
 2. design-agent         → translates Figma into Flutter design specs
 3. supabase-agent       → provisions backend, writes supabase handoff files
 4. flutter-coding-agent → implements features using all the above
 5. browser-mode-tester  → validates everything works
+```
+
+### Adding a feature or change to an existing app
+
+```
+0. requirement-engineer → scoped change requirements (recommended)
+1. planning-agent       → updates the app plan
+2. (design-agent / supabase-agent as needed)
+3. flutter-coding-agent → implements the feature
+4. browser-mode-tester  → validates the change
 ```
 
 ### How agents communicate
@@ -208,24 +220,31 @@ Agents don't call each other directly (except where the permission matrix allows
 
 ```
 ai-context/
+  planning-status.json     ← initial_planning_completed flag (read by ALL agents)
+  requirements-engineer/
+    requirements.md        ← full requirements doc → read by planning-agent
+    change-request-*.md   ← scoped change requests
   planning-agent/
-    app-plan.md          ← feature plan, user stories, screen map
-    design-brief.md      ← color direction, tone, typography
-    supabase-plan.md     ← tables, auth strategy, migration order
+    app-plan.md            ← feature plan, user stories, screen map
+    design-brief.md        ← color direction, tone, typography
+    supabase-plan.md       ← tables, auth strategy, migration order
   design-agent/
-    *.md                 ← design specs & implementation guides
+    *.md                   ← design specs & implementation guides
   supabase-agent/
-    supabase-setup.md    ← connection details, table list, RLS summary
+    supabase-setup.md      ← connection details, table list, RLS summary
   browser-mode-tester/
-    *-test-instructions.md  ← queued test tasks
+    *-test-instructions.md ← queued test tasks
 ```
 
 ### Example: starting a new app from scratch
 
 ```
-# Step 1 — describe your idea
-planning-agent: I want to build a recipe manager app with
-                user accounts, ingredient tracking, and meal planning
+# Step 0 — define requirements (recommended)
+requirement-engineer: new app — a recipe manager with user accounts,
+                      ingredient tracking, and meal planning
+
+# Step 1 — create app plan (reads requirements.md automatically)
+planning-agent: create plan from requirements
 
 # Step 2 — set up the design (if you have a Figma file)
 design-agent: initialize design project, figma_url: https://figma.com/design/...

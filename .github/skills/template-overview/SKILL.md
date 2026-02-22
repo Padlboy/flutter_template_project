@@ -62,7 +62,8 @@ This repository is a **production-ready Flutter starter** for building authentic
 ├── analysis_options.yaml           ← Dart linter rules
 └── .github/
     ├── agents/                     ← Agent instruction files
-    │   ├── planning-agent.md       ← Planning agent (MUST run first)
+    │   ├── requirement-engineer.md ← Requirements elicitation agent (recommended first step)
+    │   ├── planning-agent.md       ← Planning agent (MUST run before impl agents)
     │   ├── flutter-coding-agent.md ← Main coding agent
     │   ├── design-agent.md         ← Figma/design agent
     │   ├── supabase-agent.md       ← Supabase backend agent
@@ -131,18 +132,30 @@ See the `agent-call-rules` skill for the full authoritative ruleset.
 
 | Agent | Can call | Creates output for |
 |---|---|---|
+| `requirement-engineer` | planning-agent (hand-off) | planning-agent (requirements.md) |
 | `planning-agent` | nobody | all agents (app-plan.md, design-brief.md, supabase-plan.md) |
 | `flutter-coding-agent` | design-agent, supabase-agent, browser-mode-tester | production code |
 | `design-agent` | nobody | handoff files → `ai-context/design-agent/` |
 | `supabase-agent` | nobody | handoff files → `ai-context/supabase-agent/` |
 | `browser-mode-tester` | flutter-coding-agent (only when NOT called by coder) | test reports |
 
+### Planning Status Flag
+```
+ai-context/planning-status.json
+```
+Read this first. `initial_planning_completed: false` → full planning needed. `true` → scoped changes only.
+
 ### Planning Files Location
 ```
-ai-context/planning-agent/
-├── app-plan.md           ← Master app plan (required by all agents)
-├── design-brief.md       ← Design direction for design-agent
-└── supabase-plan.md      ← DB + auth plan for supabase-agent
+ai-context/
+├── planning-status.json         ← flag: initial_planning_completed (read by ALL agents)
+├── requirements-engineer/
+│   ├── requirements.md            ← full requirements doc (read by planning-agent)
+│   └── change-request-*.md        ← scoped change requests
+└── planning-agent/
+    ├── app-plan.md                ← Master app plan (required by all impl agents)
+    ├── design-brief.md            ← Design direction for design-agent
+    └── supabase-plan.md           ← DB + auth plan for supabase-agent
 ```
 
 ### Handoff Files Location

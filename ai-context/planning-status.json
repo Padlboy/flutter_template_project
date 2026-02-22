@@ -1,0 +1,6 @@
+{
+  "initial_planning_completed": false,
+  "note": "Set 'initial_planning_completed' to true after the first full app plan and requirements have been defined and implemented. When false, the requirement-engineer and planning-agent will guide you through the full initial setup first. When true, both agents accept scoped change and new-feature requests.",
+  "last_updated": null,
+  "app_name": null
+}

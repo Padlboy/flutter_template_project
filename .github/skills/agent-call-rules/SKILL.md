@@ -6,15 +6,30 @@ description: "Authoritative ruleset defining which agent can call which other ag
 # Agent Call Rules
 
 > ⚠️ **Every agent MUST read these rules before starting any work.**
-> ⚠️ **Every agent MUST verify that the planning agent has run before starting any work.**
+> ⚠️ **Every agent MUST check `ai-context/planning-status.json` before starting any work.**
+> ⚠️ **Every implementation agent MUST verify that the planning agent has run before starting any work.**
 
 ---
 
-## 0. The Golden Rule — Planning First
+## 0. The Golden Rules
 
-**Before any agent does anything, the planning-agent MUST have produced an app plan.**
+### Rule 0a — Check Planning Status First
 
-### How to check
+**Before any agent does anything, check the planning status flag:**
+```
+ai-context/planning-status.json
+```
+
+| `initial_planning_completed` | Required action |
+|---|---|
+| `false` | **STOP.** No app has been planned yet. Tell the user: *"No requirements or app plan exist yet. Please run the `requirement-engineer` first to define requirements, then the `planning-agent` to create the app plan."* |
+| `true` | Proceed. Scope your work to the specific feature or change being requested. |
+
+The `requirement-engineer` and `planning-agent` are exempt from this rule — they ARE the agents that establish the initial plan.
+
+### Rule 0b — App Plan Gate
+
+**Before any *implementation* agent does anything, the planning-agent MUST have produced an app plan.**
 
 Look for the master plan file:
 ```
@@ -26,7 +41,7 @@ ai-context/planning-agent/app-plan.md
 
 > ❌ No app plan found. The planning-agent must run first and create `ai-context/planning-agent/app-plan.md` before I can start working. Please invoke the planning-agent with your app idea first.
 
-This rule applies to **every agent without exception** — coding, design, supabase, and testing agents all check for this file.
+This rule applies to the design, supabase, coding, and browser-mode-tester agents. The `requirement-engineer` and `planning-agent` themselves are exempt.
 
 ---
 
@@ -34,7 +49,8 @@ This rule applies to **every agent without exception** — coding, design, supab
 
 | Agent | Role | Invoked by |
 |---|---|---|
-| `planning-agent` | Creates the master app plan, design brief, and Supabase plan | User directly |
+| `requirement-engineer` | Elicits and documents all requirements. Optional but recommended first step. | User directly or planning-agent (hand-off) |
+| `planning-agent` | Creates/updates the master app plan, design brief, and Supabase plan | User directly, requirement-engineer |
 | `flutter-coding-agent` | Implements features in Flutter/Dart | User directly |
 | `design-agent` | Fetches Figma designs, generates design specs and handoff files | User directly or flutter-coding-agent |
 | `supabase-agent` | Sets up backend, schema, auth, generates Flutter wiring | User directly or flutter-coding-agent |
@@ -45,9 +61,13 @@ This rule applies to **every agent without exception** — coding, design, supab
 ## 2. Call Permission Matrix
 
 ```
+requirement-engineer
+  ├── CAN CALL:   planning-agent (when requirements are complete and user is ready)
+  └── CAN BE CALLED BY: user only
+
 planning-agent
   ├── CAN CALL:   nobody
-  └── CAN BE CALLED BY: user only
+  └── CAN BE CALLED BY: user, requirement-engineer
 
 flutter-coding-agent
   ├── CAN CALL:   design-agent
@@ -72,13 +92,27 @@ browser-mode-tester
 
 ## 3. Detailed Rules Per Agent
 
+### requirement-engineer
+
+- Called **directly by the user** with the initial app idea or a change/feature request.
+- **Supports two modes:**
+  - **Mode A (new app):** `planning-status.json → initial_planning_completed: false` — runs full requirements elicitation and writes `ai-context/requirements-engineer/requirements.md`.
+  - **Mode B (change/feature):** `planning-status.json → initial_planning_completed: true` — runs scoped change elicitation and writes `ai-context/requirements-engineer/change-request-<name>.md`.
+- **MAY call `planning-agent`** when requirements are complete and the user is ready to proceed.
+- **Does NOT call** any other agent.
+- The `requirement-engineer` is **optional** — the planning-agent can also work from a direct developer description.
+
+---
+
 ### planning-agent
 
-- Called **directly by the user** with the initial app idea / prompt.
+- Called **directly by the user** or by the `requirement-engineer`.
+- **Supports two modes:**
+  - **Mode A (new app):** `planning-status.json → initial_planning_completed: false` — creates full plan from scratch. Reads `requirements.md` if available.
+  - **Mode B (change/feature):** `planning-status.json → initial_planning_completed: true` — updates existing plan sections relevant to the change.
 - **Does NOT call any other agent.**
-- **Cannot be called by any other agent.**
+- After Mode A completes, sets `initial_planning_completed: true` in `planning-status.json`.
 - Produces three planning files (see section 5) that all other agents read.
-- Must be the first agent invoked for any new app or major feature.
 
 ---
 
@@ -145,6 +179,7 @@ browser-mode-tester
 
 | Producer | Output Directory | Consumer |
 |---|---|---|
+| `requirement-engineer` | `ai-context/requirements-engineer/` | `planning-agent` (reads requirements.md) |
 | `planning-agent` | `ai-context/planning-agent/` | All agents (planning gate) |
 | `design-agent` | `ai-context/design-agent/` | `flutter-coding-agent` |
 | `supabase-agent` | `ai-context/supabase-agent/` | `flutter-coding-agent` |
@@ -168,7 +203,8 @@ The `planning-agent` produces these files. All other agents read them:
 
 | Situation | Required action |
 |---|---|
-| No `app-plan.md` | **Reject work. Tell user to run planning-agent first.** |
+| `planning-status.json → initial_planning_completed: false` | **STOP (for impl agents).** Tell user to run requirement-engineer then planning-agent first. |
+| No `app-plan.md` | **Reject work (impl agents).** Tell user to run planning-agent first. |
 | UI implementation needed, no design spec | Call design-agent first |
 | Supabase feature needed, no handoff file | Call supabase-agent first |
 | Feature complete | Call browser-mode-tester to validate |
@@ -182,6 +218,9 @@ The `planning-agent` produces these files. All other agents read them:
 These are the authoritative values for each agent's markdown front matter:
 
 ```yaml
+# requirement-engineer.md
+agents: ['planning-agent']
+
 # planning-agent.md
 agents: []
 
