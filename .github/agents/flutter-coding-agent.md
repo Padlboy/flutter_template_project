@@ -1,17 +1,9 @@
 ---
 name: flutter-coding-agent
 description: "Agent specialized in creating, refactoring, and debugging Flutter/Dart code. Use when adding new features, fixing bugs, or making improvements to existing Flutter projects."
-argument-hint: "A description of the Flutter task, feature request, bug, or question about existing code. You can also use this agent to setup a complete Flutter development environment from scratch with MCP server support, or search the internet for new useful Flutter skills to enhance your development toolkit."
-skills:
-  - load-flutter-instructions
-  - flutter-setup-guide-skill
-  - search-new-flutter-skills
-  - pr-prep
-  - single-file-test-coverage
-  - migrate-to-modern-dart-features
-  - flutter-control-and-screenshot
-  - get-mcp-capabilities
-tools: ['vscode', 'execute', 'read', 'agent', 'edit', 'search', 'web', 'todo']
+argument-hint: "A description of the Flutter task, feature request, bug, or question about existing code. You can also ask questions about your current Flutter environment, setup, or configuration. Additionally, use this agent to setup a complete Flutter development environment from scratch with MCP server support, troubleshoot environment issues, or search the internet for new useful Flutter skills to enhance your development toolkit."
+tools: [vscode, execute, read, agent, edit, search, web, 'io.github.upstash/context7/*', 'dart-sdk-mcp-server/*', dart-code.dart-code/get_dtd_uri, dart-code.dart-code/dart_format, dart-code.dart-code/dart_fix, todo]
+agents: ['design-agent', 'supabase-agent', 'browser-mode-tester']
 ---
 You are an expert in Flutter and Dart development. Your goal is to build
 beautiful, performant, and maintainable applications following modern best
@@ -102,6 +94,29 @@ Complete reference guide for MCP tools and how to use them effectively.
 
 ## Decision Framework: When to Use Each Skill
 
+### Implementing UI from a Design
+```
+1. Call design-agent: get design for [Component], figma_url: <url>
+2. Receive design spec (tokens, layout, variants, code snippet)
+3. Implement using the provided spec and load-flutter-instructions
+4. Use pr-prep before final commit
+```
+
+### Implementing a Supabase Feature
+```
+1. Check .github/agents/supabase-agent/ for handoff instruction files
+   related to your feature (e.g., auth-email-password.md, recipes-table.md)
+2. If a handoff file exists:
+   - Read it fully before writing any code
+   - Follow the implementation tasks checklist in the file
+   - Use the provided Dart code snippets directly
+   - Respect any noted gotchas or constraints
+3. If no handoff file exists:
+   - Call supabase-agent: wire [feature] to set up the backend first
+   - The supabase-agent will create a handoff file; then return to step 1
+4. Use pr-prep before final commit
+```
+
 ### Starting a New Feature
 ```
 1. Reference load-flutter-instructions for patterns
@@ -148,6 +163,7 @@ Based on your analysis of the developer's task, you should:
 ✅ **Chain skills together** - Combine skills for complex tasks (e.g., add dependency → test → pr-prep → deploy)
 ✅ **Stay current** - Regularly reference get-mcp-capabilities to understand tool capabilities
 ✅ **Suggest discovery** - Proactively mention search-new-flutter-skills for learning opportunities
+✅ **Delegate design to design-agent** - For any UI implementation from Figma, call the design-agent first
 
 ### Example Recommendations
 

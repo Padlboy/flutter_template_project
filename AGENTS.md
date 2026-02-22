@@ -1,0 +1,116 @@
+# AGENTS.md
+
+This repository uses a multi-agent workflow for Flutter app development.
+
+## Agents
+
+### design-agent
+**Location:** `.github/agents/design-agent.md`
+
+The **design-agent** is responsible for all design-related tasks:
+- Fetching design specifications and assets from Figma (via Figma MCP server)
+- Generating markdown design specs and implementation guides for the coding agent
+- Extracting design tokens (colors, typography, spacing) in Flutter-ready Dart constants
+- Setting up and maintaining the connection to the Figma design project
+- Answering design questions and clarifying design intent
+
+**The coding agent should delegate all design tasks to the design-agent.**
+
+To invoke it, prefix your request:
+```
+design-agent: get design for [Component], figma_url: <url>
+design-agent: clarify [design question]
+design-agent: generate implementation guide for [Component], target: flutter
+design-agent: extract design system, figma_url: <url>, format: flutter-constants
+design-agent: initialize design project, figma_url: <url>
+```
+
+---
+
+### supabase-agent
+**Location:** `.github/agents/supabase-agent.md`
+
+The **supabase-agent** is responsible for all Supabase backend tasks:
+- Creating and managing Supabase projects via the Supabase MCP server
+- Designing schemas, writing migrations, and configuring RLS policies
+- Setting up authentication (email/password, magic link, OAuth, OTP, MFA)
+- Generating Flutter Dart integration code using `supabase_flutter` v2
+- Verifying the Supabase setup (project health, security advisors, config)
+- Running an interactive onboarding process when no Supabase config is detected
+- Answering any question about Supabase architecture, pricing, or best practices
+
+**The coding agent MUST call the supabase-agent before implementing any Supabase-related feature.**
+The supabase-agent prepares the backend, generates Flutter integration code, and confirms readiness — the coding agent then implements the UI/business logic on top.
+
+To invoke it, prefix your request:
+```
+supabase-agent: setup
+supabase-agent: status
+supabase-agent: auth [provider]
+supabase-agent: db create [table description]
+supabase-agent: db query [description]
+supabase-agent: wire [feature name]
+supabase-agent: question [topic]
+supabase-agent: deploy checklist
+```
+
+---
+
+### browser-mode-tester
+**Location:** `.github/agents/browser-mode-tester.md`
+
+The **browser-mode-tester** is responsible for all automated testing:
+- Running Playwright E2E tests against the Flutter web app in Chrome
+- Writing and executing Flutter unit tests and widget tests
+- Reading test instruction markdown files dropped by other agents in `.github/agents/browser-mode-tester/`
+- Falling back to a full-app smoke test when no instructions are provided
+- Storing and managing test account credentials in `.github/agents/browser-mode-tester/tester-credentials.json`
+- Reporting test failures with locators, screenshots, and suggested fixes
+
+**The coding agent should call the browser-mode-tester after implementing a feature to validate it.**
+Other agents can drop a `<feature>-test-instructions.md` file in `.github/agents/browser-mode-tester/` to queue test tasks.
+
+To invoke it, prefix your request:
+```
+browser-mode-tester: e2e                          # run full Playwright smoke test
+browser-mode-tester: e2e [feature/file]            # test a specific feature
+browser-mode-tester: unit [file or feature]        # run/write Flutter unit tests
+browser-mode-tester: setup                         # initialise Playwright in this project
+browser-mode-tester: credentials                   # update tester login credentials
+browser-mode-tester: report                        # show last test run HTML report
+```
+
+**The tester will ask for the Flutter web server port if it can't determine it automatically.**
+
+---
+
+## Global Rules for All Agents
+
+### Context7 / Documentation Lookups
+If the `upstash/context7` MCP server is available, **always prefer it** for looking up library and framework documentation over web search or relying on training data.
+
+Use it whenever you need to check:
+- API signatures, widget properties, or method parameters (Flutter, Dart, Figma APIs, etc.)
+- Package documentation (pub.dev packages, npm packages, etc.)
+- Framework-specific patterns or configuration options
+- Any documentation where an up-to-date, authoritative source is better than a recalled answer
+
+```
+# Resolve the library ID first, then fetch docs
+resolve_library_id("flutter")         → use returned ID in get_library_docs
+get_library_docs(libraryId, "topic")  → authoritative, version-aware docs
+```
+
+Only fall back to web search or prior knowledge if Context7 does not have coverage for the library in question.
+
+---
+
+## Project Overview
+
+This is a Flutter template repository. All Flutter source code lives in:
+- `recipe_manager/lib/` — main Flutter app source
+- `recipe_manager/test/` — widget and unit tests
+
+Design assets and specs generated by the design-agent should be placed in:
+- `.github/agents/design-agent/` — spec files and design documentation
+- `recipe_manager/lib/design/` — generated Flutter design constants (tokens)

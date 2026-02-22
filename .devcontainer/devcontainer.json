@@ -1,0 +1,35 @@
+{
+  "name": "Flutter Template Repo",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "flutter-dev",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  "remoteUser": "flutter",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.dart-code",
+        "Dart-Code.flutter",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-vscode.makefile-tools"
+      ],
+      "settings": {
+        "dart.mcpServer": true,
+        // dart.sdkPath must point to the SDK root, NOT the bin/ subdirectory
+        "dart.sdkPath": "/sdks/flutter/bin/cache/dart-sdk",
+        "dart.flutterSdkPath": "/sdks/flutter",
+        "dart.devToolsPort": 9100,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "Dart-Code.dart-code",
+        "[dart]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "Dart-Code.dart-code"
+        }
+      }
+    }
+  },
+  // Runs once after the container is created; the workspace is already mounted here
+  "postCreateCommand": "cd /workspace/recipe_manager && flutter pub get",
+  "forwardPorts": [8080, 8081, 9100]
+}
